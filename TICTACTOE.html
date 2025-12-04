@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe</title>
+  <style>
+    :root {
+      --bg: #0f172a;          /* slate-900 */
+      --panel: #111827;       /* gray-900 */
+      --tile: #1f2937;        /* gray-800 */
+      --tile-hover: #374151;  /* gray-700 */
+      --text: #e5e7eb;        /* gray-200 */
+      --muted: #9ca3af;       /* gray-400 */
+      --accent: #22c55e;      /* green-500 */
+      --info: #93c5fd;        /* blue-300 */
+      --danger: #ef4444;      /* red-500 */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 70% -10%, #1f2937 0%, #0b1022 55%, #070c1a 100%);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .app {
+      width: min(460px, 94vw);
+      background: linear-gradient(180deg, #0b1226, #0a0f1d);
+      border: 1px solid #1f2a44;
+      border-radius: 16px;
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.45),
+        inset 0 0 0 1px rgba(255,255,255,.03);
+      overflow: hidden;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid #1f2a44;
+      background: rgba(17,24,39,.55);
+      backdrop-filter: blur(8px);
+    }
+    .title { font-size: 1rem; color: var(--muted); letter-spacing: .3px; }
+    .nav a {
+      color: #93c5fd;
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    .ui {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(2,6,23,.45);
+      border: 1px solid #1f2a44;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+    .status .turn { color: var(--info); font-weight: 600; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 6px;
+    }
+    .cell {
+      aspect-ratio: 1 / 1;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #0f1831, #0c1428);
+      border: 1px solid #223055;
+      border-radius: 12px;
+      font-size: clamp(2.2rem, 11vw, 3.2rem);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      user-select: none;
+    }
+    .cell:hover { background: linear-gradient(180deg, #132045, #101a36); }
+    .cell:active { transform: translateY(1px) scale(0.99); }
+    .cell.win { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(34,197,94,.35) inset; }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      appearance: none;
+      border: 1px solid #223055;
+      background: linear-gradient(180deg, #0f1831, #0c1428);
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      box-shadow:
+        0 2px 6px rgba(0,0,0,.35),
+        inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+    button:hover { background: linear-gradient(180deg, #132045, #101a36); }
+    button:active { transform: translateY(1px) scale(0.99); }
+    button.primary {
+      background: linear-gradient(180deg, #1f8f56, #157f49);
+      border-color: #2aa865;
+      font-weight: 700;
+    }
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 4px 10px 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Tic Tac Toe">
+    <div class="topbar">
+      <div class="title">Tic Tac Toe</div>
+      <div class="nav">index.html← Back to Calculator</a></div>
+    </div>
+
+    <div class="ui">
+      <div class="status" aria-live="polite" aria-atomic="true">
+        <div id="message">Your turn: <span class="turn" id="turn">X</span></div>
+        <div id="score">X: <span id="scoreX">0</span> &nbsp; | &nbsp; O: <span id="scoreO">0</span></div>
+      </div>
+
+      <div class="board" id="board" role="grid" aria-label="3 by 3 grid">
+        <!-- 9 cells -->
+        <div class="cell" role="gridcell" data-idx="0"></div>
+        <div class="cell" role="gridcell" data-idx="1"></div>
+        <div class="cell" role="gridcell" data-idx="2"></div>
+        <div class="cell" role="gridcell" data-idx="3"></div>
+        <div class="cell" role="gridcell" data-idx="4"></div>
+        <div class="cell" role="gridcell" data-idx="5"></div>
+        <div class="cell" role="gridcell" data-idx="6"></div>
+        <div class="cell" role="gridcell" data-idx="7"></div>
+        <div class="cell" role="gridcell" data-idx="8"></div>
+      </div>
+
+      <div class="controls">
+        <button id="reset">Reset Board</button>
+        <button id="playAgain" class="primary">Play Again</button>
+        <button id="swapStart">Swap First Player</button>
+      </div>
+    </div>
+
+    <div class="footer">Two‑player local game — tracks wins and draws</div>
+  </div>
+
+  <script>
+    (() => {
+      const boardEl = document.getElementById('board');
+      const cells = Array.from(boardEl.querySelectorAll('.cell'));
+      const turnEl = document.getElementById('turn');
+      const msgEl = document.getElementById('message');
+      const scoreXEl = document.getElementById('scoreX');
+      const scoreOEl = document.getElementById('scoreO');
+
+      const btnReset = document.getElementById('reset');
+      const btnAgain = document.getElementById('playAgain');
+      const btnSwap = document.getElementById('swapStart');
+
+      let board = Array(9).fill(null); // 'X' | 'O' | null
+      let xStarts = true;               // who starts next round
+      let current = xStarts ? 'X' : 'O';
+      let gameOver = false;
+      let scoreX = 0, scoreO = 0;
+
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8], // rows
+        [0,3,6], [1,4,7], [2,5,8], // cols
+        [0,4,8], [2,4,6]           // diagonals
+      ];
+
+      function updateStatus(text) {
+        msgEl.textContent = text;
+        turnEl.textContent = current;
+      }
+
+      function render() {
+        cells.forEach((c, i) => {
+          c.textContent = board[i] ?? '';
+          c.classList.toggle('win', false);
+        });
+        updateStatus(gameOver ? 'Game Over' : `Your turn: ${current}`);
+        scoreXEl.textContent = String(scoreX);
+        scoreOEl.textContent = String(scoreO);
+      }
+
+      function checkWinner() {
+        for (const line of wins) {
+          const [a, b, c] = line;
+          if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            // highlight winning cells
+            line.forEach(idx => cells[idx].classList.add('win'));
+            return board[a]; // 'X' or 'O'
+          }
+        }
+        if (board.every(x => x)) return 'Draw';
+        return null;
+      }
+
+      function nextTurn() {
+        current = (current === 'X') ? 'O' : 'X';
+        updateStatus(`Your turn: ${current}`);
+      }
+
+      function handleClick(e) {
+        const cell = e.target.closest('.cell');
+        if (!cell) return;
+        const idx = Number(cell.dataset.idx);
+        if (gameOver || board[idx]) return;
+
+        board[idx] = current;
+        cell.textContent = current;
+
+        const res = checkWinner();
+        if (res) {
+          gameOver = true;
+          if (res === 'X') { scoreX++; updateStatus('X wins!'); }
+          else if (res === 'O') { scoreO++; updateStatus('O wins!'); }
+          else updateStatus('It’s a draw!');
+        } else {
+          nextTurn();
+        }
+      }
+
+      function resetBoard(hard = false) {
+        board = Array(9).fill(null);
+        cells.forEach(c => c.classList.remove('win'));
+        gameOver = false;
+        if (hard) {
+          scoreX = 0; scoreO = 0;
+        }
+        current = xStarts ? 'X' : 'O';
+        render();
+      }
+
+      function playAgain() {
+        // keep scores, alternate who starts
+        xStarts = !xStarts;
+        resetBoard(false);
+      }
+
+      function swapStarter() {
+        xStarts = !xStarts;
+        current = xStarts ? 'X' : 'O';
+        updateStatus(`Starter swapped. ${current} begins.`);
+      }
+
+      // Events
+      boardEl.addEventListener('click', handleClick);
+      btnReset.addEventListener('click', () => resetBoard(true));
+      btnAgain.addEventListener('click', playAgain);
+      btnSwap.addEventListener('click', swapStarter);
+
+      // Keyboard: 1–9 to place (top-left is 1, bottom-right is 9)
+      document.addEventListener('keydown', (e) => {
+        if (gameOver) return;
+        const k = e.key;
+        if (/[1-9]/.test(k)) {
+          const idx = Number(k) - 1;
+          if (!board[idx]) {
+            board[idx] = current;
+            cells[idx].textContent = current;
+            const res = checkWinner();
+            if (res) {
+              gameOver = true;
+              if (res === 'X') { scoreX++; updateStatus('X wins!'); }
+              else if (res === 'O') { scoreO++; updateStatus('O wins!'); }
+              else updateStatus('It’s a draw!');
+            } else {
+              nextTurn();
+            }
+          }
+        } else if (k === 'r' || k === 'R') {
+          playAgain();
+        }
+      });
+
+      // Initial paint
+      render();
+    })();
+  </script>
+</body>
+</html>
